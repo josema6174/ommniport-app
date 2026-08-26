@@ -1,0 +1,41 @@
+# =========================
+# Sistema Operativo (macOS)
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# =========================
+# Compilación (CMake & JUCE)
+# =========================
+build/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+cmake-build-*/
+compile_commands.json
+JUCE/
+
+# =========================
+# Archivos Binarios
+# =========================
+*.o
+*.a
+*.dylib
+*.app
+*.dmg
+*.exe
+*.dll
+
+# =========================
+# Entorno de Desarrollo (Antigravity/VS Code)
+# =========================
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+*.code-workspace
+.idea/
+*.swp
