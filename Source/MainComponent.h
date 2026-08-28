@@ -4,8 +4,8 @@
 
 //==============================================================================
 /**
- * MainComponent es el componente raíz de la ventana principal.
- * Tamaño inicial: 600 x 400 px.
+ * MainComponent implementa la interfaz auténtica del Omnichord (estilo OM-27 / OM-36)
+ * con matriz inclinada (sheared parallelogram) y placa de rasgueo táctil.
  */
 class MainComponent : public juce::Component
 {
@@ -18,6 +18,7 @@ public:
     void paint    (juce::Graphics&) override;
     void resized  () override;
     void mouseDown       (const juce::MouseEvent& event) override;
+    void mouseDrag       (const juce::MouseEvent& event) override;
     void mouseUp         (const juce::MouseEvent& event) override;
     void mouseWheelMove  (const juce::MouseEvent& event,
                           const juce::MouseWheelDetails& wheel) override;
@@ -26,34 +27,38 @@ public:
 
 private:
     //==========================================================================
-    // --- Helpers ---
-    void updateChord      (std::vector<int> notes);
-    void releaseBackground();
-    void activateChord    (int buttonIndex);
+    // --- Helpers de acordes y MIDI ---
+    void updateChord       (std::vector<int> notes);
+    void releaseBackground ();
+    void activateChord     (int buttonIndex);
+    int  getChordIndexAt   (juce::Point<float> pt) const;
 
     //==========================================================================
     std::unique_ptr<juce::MidiOutput> midiOutput;
 
+    // --- Geometría de interfaz ---
+    juce::Rectangle<float> matrixArea;
+    juce::Rectangle<int>   strumZone;
+    const float            slantDx { 34.0f };       // Inclinación horizontal de columnas
+
     // --- Strumming state (trackpad) ---
-    juce::Rectangle<int>  strumZone;                 // área táctil de rasgueo
-    const float       strumThreshold    { 0.1f };   // distancia mínima por paso
+    const float       strumThreshold    { 0.08f };  // distancia mínima por paso
     float             scrollAccum       { 0.0f };   // acumulador de scroll
     int               strumIndex        { 0 };      // posición actual en el acorde
     int               lastNotePlayed    { -1 };     // nota de arpeggio activa
-    std::vector<int>  currentChordNotes { 60, 64, 67, 72, 76, 79 }; // Do Mayor
+    std::vector<int>  currentChordNotes { 60, 64, 67, 72, 76, 79, 84, 88, 91, 96, 100, 103 };
 
     // --- Background state ---
-    std::vector<int>  activeBackgroundNotes;         // notas de bajo sostenidas
+    std::vector<int>  activeBackgroundNotes;        // notas de bajo sostenidas
 
-    // --- Keyboard mapping ---
-    struct ChordDef { int root; std::vector<int> intervals; };
-    std::vector<ChordDef>   chordDefs;              // paralelo a chordButtons
-    std::map<int, int>      keyToChordIndex;        // keyCode → índice de botón
-    int                     activeKeyCode    { -1 };// tecla activa (-1 = ninguna)
-    int                     activeButtonIndex{ -1 };// botón destacado (-1 = ninguno)
-
-    // --- Matriz de botones de acorde (36 = 12 raíces × 3 tipos) ---
-    std::vector<std::unique_ptr<juce::TextButton>> chordButtons;
+    // --- Chord definitions (9 columnas x 3 filas = 27 acordes) ---
+    struct ChordDef { int root; std::vector<int> intervals; juce::String name; };
+    std::vector<ChordDef>   chordDefs;
+    std::map<int, int>      keyToChordIndex;        // keyCode -> chord index (0..26)
+    int                     activeKeyCode     { -1 };
+    int                     activeButtonIndex { -1 };
+    bool                    isMouseDownOnMatrix { false };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
+
